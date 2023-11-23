@@ -9,6 +9,9 @@ from flask import Flask, render_template, request
 from datetime import datetime, timezone, timedelta
 app = Flask(__name__)
 
+import requests
+from bs4 import BeautifulSoup
+
 @app.route("/")
 def index():
     homepage = "<h1>向育學網頁2023/11/23</h1>"
@@ -18,6 +21,7 @@ def index():
     homepage += "<a href=/about>個人簡介網頁</a><br>"
     homepage += "<a href=/search>圖書查詢:</a><br>"
     homepage += "<br><a href=/books>圖書精選</a><br>"
+    homepage += "<br><a href=/spider>網路爬蟲</a><br>"
     return homepage
 
 @app.route("/mis")
@@ -71,7 +75,22 @@ def books():
         Result += "周年" + str(bk["anniversary"]) + "周年紀念版" + "<br>"
         Result += "<img src=" + bk["cover"] + "></img><br><br>"
 
-    return Result
+@app.route("/spider")
+def spider():
+    info = ""
 
+    url = "https://www1.pu.edu.tw/~tcyang/course.html"
+    Data = requests.get(url)
+    Data.encoding = "utf-8"
+    #print(Data.text)
+    sp = BeautifulSoup(Data.text, "html.parser")
+    result=sp.select(".team-box ")
+
+    for x in result:
+        info += "<a href=" + x.find("a").get("href") + ">" + x.find("h4").text + "<br>"
+        info +=x.find("p").text + "<br>"
+        info +=x.find("a").get(href) + "<br>"
+        info +="<img src=https://www1.pu.edu.tw/~tcyang/course.html"+x.find("img").get("src")+"width=200 height=300></img><br><br>"
+    return info
 if __name__ == "__main__":
     app.run(debug=True)
